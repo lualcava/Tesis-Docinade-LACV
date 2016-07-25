@@ -1,0 +1,81 @@
+\chapter{Metodología}
+En el presente capítulo de detalla el diseño de experimentos, en el cual se siguen los lineamientos planteados en \cite{montgomery2008design}. Esta metodología abarca los siguientes aspectos:
+\begin{enumerate}
+  \item \textbf{Declaración del problema:} Una vez identificado el problema, se realiza una declaración clara y sencilla del mismo.
+  \item \textbf{Factores y niveles:} Se enumeran todos los factores que pueden influenciar la ejecución de los experimentos, así como los niveles y rangos para cada uno de esos factores.
+  \item \textbf{Variables de respuesta:} Corresponde a la descripción de las métricas a utilizar para determinar la efectividad del proceso siendo estudiado.
+\end{enumerate}
+Cada uno de los elementos enumerados se desarrollan a continuación.
+\section{Declaración del Problema}
+Determinar si la utilización de distintas métricas de similitud de texto combinadas mediante métodos agregados mejoran el nivel de acierto en procesos de imputación de valores faltantes.
+
+\section{Factores y Niveles}
+Los siguientes factores y sus respectivos niveles han sido identificados como relevantes en el diseño de los experimentos para este proyecto:
+\begin{itemize}
+\item [1.] Representación de los documentos de texto
+\begin{itemize}
+\item [a.] Vector de Palabras
+\item [b.] Asignación de Dirichlet Latente
+\end{itemize}
+
+\item [2.] Medidas de similitud de texto
+\begin{itemize}
+\item [a.] Divergencia Kullback-Leibler
+\item [b.] Similitud $Jaccard$
+\item [c.] Distancia Coseno
+
+\end{itemize}
+
+\item [3.] Método agregado
+\begin{itemize}
+\item [a.] Boosting
+\item [b.] Bagging
+\end{itemize}
+
+\item [3.] Conjunto de datos
+\begin{itemize}
+\item [a.] $Reuters$: Imputación del tema basado en el contenido textual de la noticia
+\item [b.] $Reuters$: Imputación del lugar al que hace referencia una noticia basado en el texto
+\item [c.] Información personal: Imputación del país de procedencia basado en otros atributos de texto
+ \end{itemize}
+\end{itemize}
+
+Factores no considerados en los experimentos pero que podrían influir en los resultados:
+\begin{itemize}
+\item Pre-procesamiento y calidad de los datos.
+\item Bibliotecas de software utilizadas para implementar los algoritmos y métricas.
+\item Etiquetado en el conjunto de datos de entrenamiento.
+\item Otros parámetros de los algoritmos a utilizar.
+\end{itemize}
+
+
+\section{Variables de Respuesta}
+Las variables a considerar para evaluar los experimentos son las siguientes:
+\begin{itemize}
+\item [1.] \textbf{Exactitud}. Determina el porcentaje de aciertos en un experimento tomando en cuenta el total de la población. Se obtiene mediante la fórmula \ref{equation-precision}.
+\item [2.] \textbf{Precisión}. En un determinado experimento y para una determinada etiqueta o clase, la precisión representa la proporción de instancias de dicha clase correctamente clasificadas con respecto al total de instancias clasificadas bajo esa etiqueta por el algoritmo. Su cálculo se especifica en la fórmula \ref{equation-accuracy}.
+\item [3.] \textbf{Sensibilidad ($Recall$)}. En un determinado experimento y para una determinada etiqueta o clase, la sensibilidad corresponde a la proporción de instancias de dicha clase correctamente clasificados sobre el total de instancias donde el valor correcto es esa clase. La fórmula \ref{equation-recall} define el cálculo de la sensibilidad.
+\end{itemize}
+
+\section{Recolección de Datos}
+ Los datos sin procesar serán obtenidos de repositorios públicos o páginas web mediante el uso de API’s propios del sitio o scripts especializados. Posteriormente, la aplicación implementada para ejecutar los experimentos será capaz de realizar las respectivas operaciones de preprocesamiento, selección de conjuntos de entrenamiento que servirán de entrada a los algoritmos y obtención de variables de respuesta durante y al final de cada ejecución. 
+
+\section{Analisis estadístico}
+Para asegurarse de que las distribuciones obtenidas como resultado de los diferentes experimentos son estadísticamente diferentes de acuerdo a la estrategia de algoritmo agregado empleado, se hace uso del método no-paramétrico conocido como la prueba Kruskal-Wallis. Se seleccionó dicho método debido a que no necesita supuestos de que la población sigue una distribución normal o de que el tamaño de la muestra sea lo suficientemente grande (lo que sí ocurre en los métodos paramétricos como el análisis de la varianza o ANOVA).\\
+La prueba de Kruskal-Wallis se realiza sobre muestras independientes que pueden provenir de poblaciones que no se relacionan entre sí. De esta forma, el objetivo es analizar la relación entre una variable cuantitativa $X$ y una variable cualitativa $Y$ la cual puede tener $k$ diferentes valores. Cada uno de estos valores cualitativos define una población cuyo valor es dado por la variable cuantitativa. En otras palabras, se agrupan los valores de $X$ en $k$ poblaciones $x_{1}, … , x_{k}$ y se desea determinar si $X$ no varía con respecto a los valores de $Y$:\\
+\begin{itemize}
+\item \textbf{Hipótesis nula:} Las muestras pertenecen a poblaciones idénticas ($X$ no varía según los valores de $Y$)
+\item \textbf{Hipótesis alternativa:} Al menos una muestra pertenece a una población diferente que las demás ($X$ varía dado algún valor de $Y$).
+\end{itemize}
+La ejecución de esta prueba estadística se puede realizar haciendo uso de herramientas tales como R Studio y SPSS®.
+
+\section{Ambiente de Desarrollo}
+Las herramientas a utilizar para la implementación, ejecución y validación de los experimentos deben ser capaces de ajustarse a los objetivos planteados, de forma que se facilite el desarrollo y la configuración de los diferentes métodos a utilizar.\\
+En el caso de la implementación del algoritmo de clasificación, se requiere que la biblioteca permita ajustar la métrica de distancia entre documentos de texto. En este sentido, dos posibles herramientas a utilizar serían:
+\begin{itemize}
+\item \textbf{\textit{scikit-learn} version 0.18}. Esta biblioteca de $Python$ contiene implementaciones de KNN, incluida $KNeighborsClassifier$, la cual permite configurar una métrica de comparación de tipo $DistanceMetric$. Esta clase dispone de varias medidas de similitud ya implementadas, y a su vez permite a los desarrolladores crear funciones personalizadas.
+\item \textbf{\textit{Accord.NET}}. Paquete de Microsoft® para la herramienta Visual Studio que permite el desarrollo de algoritmos de aprendizaje máquina y minería de datos en C\#. Similar a $scikit-learn$, este paquete implementa un clasificador KNN en el cual la métrica de distancia es configurable y permite la definición de funciones personalizadas. 
+\end{itemize}
+Tanto en la plataforma de $Python$ como en la de .NET se facilita la manipulación de datos y el desarrollo de métodos necesarios para ejecutar y obtener resultados. Aunque la segunda no es una versión de software libre, se cuenta con licencia académica de Visual Studio. \\
+Con respecto al preprocesamiento, se pretende explorar la utilización del paquete RTextTools versión 1.4.2 para R, en la cual existen implementaciones específicas para documentos de texto tanto para vectores de palabras como para LDA. De igual manera, este y los otros ambientes mencionados son respaldados por comunidades de desarrolladores donde se proponen implementaciones para procesamiento de texto.\\
+La ejecución de pruebas para el análisis estadístico, como se ya se mencionó, pueden realizarse mediante herramientas tales como R Studio y SPSS®. En R, por ejemplo, se puede utilizar la biblioteca PMCMR, la cual facilita la implementación de pruebas de pares con Kruskal-Wallis.

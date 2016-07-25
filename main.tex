@@ -1,0 +1,57 @@
+%------------------------------------------------------------------------
+% Template provided by MIT
+%------------------------------------------------------------------------
+\documentclass[12pt,oneside]{mitthesis}
+%------------------------------------------------------------------------
+\usepackage{ragged2e}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+\usepackage{amssymb}
+\usepackage{indentfirst}
+\usepackage[utf8]{inputenc}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{graphicx}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage[spanish]{babel}
+
+
+
+%------------------------------------------------------------------------
+\begin{document}
+%------------------------------------------------------------------------
+% Renew commands - Translation
+%------------------------------------------------------------------------
+\renewcommand{\labelitemi}{\tiny$\blacksquare$}
+\renewcommand{\bibname}{Bibliografía} 
+\renewcommand{\abstractname}{Abstract}
+\renewcommand{\contentsname}{Tabla de Contenido}
+\renewcommand{\chaptername}{Capítulo}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\algorithmcfname}{Algoritmo}
+\renewcommand{\listfigurename}{Lista de Figuras}
+\renewcommand{\listtablename}{Lista de Tablas}
+\renewcommand{\listalgorithmcfname}{Lista de Algoritmos}
+
+
+%------------------------------------------------------------------------
+% Document Structure
+%------------------------------------------------------------------------
+\include{cover}
+\include{contents}
+%\include{appb}
+%\include{appa}
+\include{intro}
+\include{proposal}
+\include{objectives}
+\include{scope}
+\include{deliverables}
+\include{method}
+\include{projectPlan}
+\include{biblio}
+
+%\addcontentsline{toc}{section}{Bibliography}
+
+
+%------------------------------------------------------------------------
+\end{document}
+%------------------------------------------------------------------------

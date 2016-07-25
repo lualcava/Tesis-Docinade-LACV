@@ -1,0 +1,110 @@
+\chapter{Introducción}
+Actualmente, muchas bases de datos alrededor del mundo sufren un problema general de valores faltantes. Dicho problema puede ser causado por diferentes razones, tales como fallos mecánicos durante la recolección de los datos, información que no existía al momento de crear la base de datos, formularios con campos no obligatorios que generan valores nulos no ingresados por los usuarios, o fallos informáticos que ocasionan pérdida de datos \cite{anagnostopoulos2014scaling,tran2015multiple}. En términos generales, las dos posibles soluciones a este problema son: la eliminación del registro o atributo que contenga valores faltantes o la imputación de dicho valor con algoritmos de aprendizaje máquina o de minería de datos \cite{anagnostopoulos2014scaling}.\\
+La eliminación de datos puede ocasionar un decremento en la cantidad de información valiosa disponible, además de sesgos importantes al momento de analizar esos datos \cite{truong2004learning}. Surge entonces la idea de imputación de datos, en la cual se utiliza algún método que permite encontrar valores plausibles para aquellos atributos en donde el valor no existe \cite{truong2004learning}. Una vez imputados los valores, los datos pueden ser considerados como confiables para el procesamiento o análisis y dicha confiabilidad depende de las suposiciones, algoritmos y datos de entrenamiento que se utilicen \cite{anagnostopoulos2014scaling, truong2004learning}.\\
+La idea general de los algoritmos de imputación de datos es encontrar relaciones entre los datos completos (valores observados) y con base en éstas, aproximar los valores a imputar en los datos incompletos (valores faltantes) \cite{mavai2014survey}. De esta forma, los métodos existentes hacen uso de funciones para estimar valores faltantes a partir de valores completos, por ejemplo, un modelo polinomial de regresión que aproxime un valor faltante en una serie de valores numéricos continuos obtenidos mediante un sensor \cite{tran2015multiple}. Sin embargo, hay situaciones en las cuales los valores completos no son numéricos, pero que aún existe la posibilidad que los mismos puedan ser utilizados para estimar el valor faltante. Este proyecto se enfoca en el problema de imputación de valores faltantes donde los valores completos son de tipo texto, de forma que los métodos a utilizar deben ser capaces de aplicar funciones sobre conjuntos de caracteres o palabras, comúnmente conocidos en la literatura como documentos \cite{srivastava2009text}.\\
+Se presenta el siguiente ejemplo para aclarar lo descrito: Se tiene una base de datos que almacena reportes de errores de sistemas que se reciben de forma constante todos los días. Cada registro almacena la siguiente información: nombre del sistema, descripción del error (campo de texto libre), persona que resolvió el problema, descripción de la solución (texto libre), causa del problema (categoría que se selecciona de una lista: error en el código, error de datos, error de usabilidad, error de proceso, etc.). La causa del problema es ingresada por la persona que resolvió el error en un formulario y que dicho campo no es obligatorio, mientras que el texto libre con la descripción de la solución sí lo es. \\
+Si en algún momento se necesitara realizar un análisis de los datos para determinar tendencias en el origen de los errores, se encontrará que la base de datos presenta una gran cantidad de valores faltantes para el atributo ‘causa del problema’ debido a personas que no ingresaron dicho valor. Aun así, dicha categoría podría inferirse a partir de los otros campos de tipo texto libre tales como la descripción del problema y la descripción del error. Aunque esto es una tarea que podría ser realizada por personas, cuando se habla de miles de registros con valores faltantes, surge la necesidad de buscar soluciones automatizadas en las que un programa sea capaz de encontrar esas relaciones entre el texto libre y las categorías de forma similar a como lo haría el cerebro humano.\\
+En este contexto, el problema de los valores faltantes puede verse como un problema de clasificación donde un algoritmo debe ser capaz de organizar los valores completos (atributos de tipo texto) en diferentes categorías. Dichas categorías representan el valor faltante a imputar. Actualmente se han propuesto diversos algoritmos en los campos de la minería de datos y del aprendizaje máquina para resolver problemas de clasificación de forma supervisada \cite{tran2015multiple,truong2004learning, ishioka2014investigations} y para el caso específico de clasificación de documentos, destacan aquellos algoritmos que hacen uso de medidas de similitud de texto, tal como Vecinos Más Cercanos (KNN de la traducción al inglés \textit{K-Nearest-Neighbors})\cite{terzi2014text}.\\
+Por lo tanto, el problema de clasificación de documentos mediante aprendizaje supervisado, implica también el problema de determinar computacionalmente qué tan similar es un texto a otro. Actualmente la literatura sobre métodos para atacar este problema es muy extensa, sin embargo, los métodos estadísticos, que intentan crear representaciones matemáticas de texto y que no toman en cuenta significado semántico o propiedades lingüísticas, han mostrado resultados muy favorables en los últimos 25 años en el campo de la minería de texto \cite{srivastava2009text}. Ejemplos de estos métodos estadísticos son todos aquellos que implican la representación de documentos mediante vectores de palabras y la utilización de medidas de distancia entre vectores tales como Coseno o \textit{Jaccard} \cite{wang2016non, soto2015similarity}. Estos métodos también son conocidos como medidas de similitud basadas en términos, que se diferencian de aquellos basados en cadenas de caracteres o textit{corpus} semánticos \cite{wang2016non}. \\
+Dado todo lo expuesto anteriormente, este proyecto se enfoca en la evaluación de medidas de similitud no tradicionales como la Asignación de Dirichlet Latente (LDA por sus siglas en inglés) y la Divergencia Kullback-Leibler (Divergencia KL) que han mostrado buenos resultados en clasificación de documentos haciendo uso del concepto de similitud entre distribuciones de probabilidad \cite{ bae2014computing, bougiatiotis2016content, huang2008similarity, metzler2007similarity}. Así mismo, se pretende combinar dichas métricas mediante métodos agregados con el fin de proponer un nuevo algoritmo de clasificación y, eventualmente, imputación de valores faltantes.
+
+\chapter{Marco teórico}
+En esta sección se explican los principales conceptos a estudiar en este proyecto, alrededor del problema de valores faltantes y la clasificación de documentos de texto.
+\section{El problema general de imputación de valores faltantes} 
+%complementar con anagnostopoulos2014scaling
+Se tiene un esquema relacional denotado por ${R(A_{1},A_{2},...,A_{n})}$ donde R es el nombre del esquema, ${A_{1},A_{2},...,A_{n}}$ corresponde a una lista de n atributos y ${dom(A_{i})}$ es el dominio de cierto atributo ${A_{i}}$ con ${1\leq i\leq n}$. Se puede representar un conjunto de datos ${r(R)}$ como un conjunto formado por m tuplas ${r=t_{1}, t_{2},…, t_{m}}$. Cada tupla t es un vector de n dimensiones, de forma que ${t=(v_{1}, v_{2},…, v_{n})}$ donde ${ v_{i} = t[A_{i}]\in dom(A_{i})}$ para ${1\leq i\leq n}$ \cite{dutta2011real}. \\
+Se define entonces el problema de los valores faltantes como la existencia de un subconjunto ${X}$  de ${r}$, formado por k tuplas ${x_{1},x_{2},...,x_{k}}$ donde para todo ${i}$ con ${1\leq i\leq k}$ existe un ${j}$ tal que ${x_{i}[A_{j}] = x_{i,j} = \beta }$ siendo ${\beta }$ un valor faltante que no pertenece al dominio del atributo ${A_{j}}$ y con ${1\leq j\leq n}$. De esta forma, la idea de imputación de datos faltantes consiste en encontrar una función ${f}$ que al ser aplicada sobre el valor de un atributo ${A_{l}}$ en la tupla ${i}$ se obtiene un valor plausible para ${ x_{i,j}}$, con ${1\leq l\leq n}$, ${l \neq  j}$, ${1\leq i\leq k}$ y ${\beta \neq x_{il} \in dom(A_{l})}$.
+\begin{equation}
+\label{equation1}
+f(x_{il}) = x’_{ij}
+\end{equation}
+En \ref{equation1} se presenta de forma simple el problema de imputación de valores faltantes para una tupla ${i}$ donde ${x_{il} \in dom(A_{l})}$ y ${x’_{ij} \in dom(A_{j})}$. ${x’_{ij}}$ representa un valor plausible para ${x_{ij} = \beta}$.
+Como ya se ha mencionado, el problema de los valores faltantes puede verse como un problema de clasificación, en el que un algoritmo debe ser capaz de organizar los valores completos en diferentes categorías que representan los valores plausibles a imputar. Este tipo de algoritmos se describen en la siguiente sección.
+\section{Algoritmo de clasificación KNN}
+Siguiendo con la notación descrita en la sección anterior, si ${A_{i}}$ es el atributo en el cual existen valores faltantes en el conjunto de datos, entonces un algoritmo de clasificación esperaría que el tipo de datos de ${A_{i}}$ sea categórico, de forma que al aplicar una función de clasificación sobre uno o varios de los otros atributos se obtenga como resultado una categoría ${c}$ tal que ${c \in dom(A_{i})}$.\\
+En este proyecto se estudia el algoritmo KNN por ser éste un clasificador con aprendizaje supervisado y que puede hacer uso de medidas de similitud de texto que se explicarán más adelante.
+El algoritmo de Vecinos más Cercanos (KNN por sus siglas en inglés), es un algoritmo de clasificación que selecciona las ${k}$ observaciones más cercanas a un determinado valor de acuerdo a alguna métrica de distancia. Aunque es categorizado como algoritmo de aprendizaje máquina, KNN es considerado un aprendiz perezoso ya que no se realiza un aprendizaje propiamente dicho sino que más bien la clasificación se realiza utilizando el mismo conjunto de entrenamiento \cite{mavai2014survey}.\\
+En el algoritmo \ref{alg-KNN} se muestra la idea general de KNN utilizado para imputación de valores faltantes. En este caso, el algoritmo recibe un conjunto de datos de entrenamiento $E$ y un conjunto de datos con valores faltantes $X$, ambos bajo el mismo esquema relacional de $n$ atributos donde el $i$-ésimo atributo en $E$ es de tipo categórico, mientras que en $X$ todos los valores para ese atributo son valores faltantes $\beta$. La función $EncontrarVecinos$ retorna una lista de $k$ tuplas tomadas del conjunto $E$ donde los valores de los atributos diferentes a $i$ son más cercanos a los valores de los mismos atributos en $x$ con respecto a alguna función de distancia. En la función $ ObtenerCategoriaPorVotacion$ se obtiene el valor con más ocurrencias en el atributo $i$ de las tuplas almacenadas en $vecinos$. Dicha categoría finalmente se reemplaza por el valor $\beta$ en $x[i]$ (Se imputa el valor faltante). \\
+\begin{algorithm}
+\label{alg-KNN}
+\KwIn{k;E;X;i}
+Sea \textit{E} un conjunto de tuplas completas donde el \textit{i}-ésimo atributo es categórico (conjunto de entrenamiento)\;
+Sea \textit{X} un conjunto de tuplas con valores faltantes en el  \textit{i}-ésimo atributo\;
+\ForEach{tupla \textit{x} en \textit{X}}{
+	$vecinos\leftarrow$ EncontrarVecinos($k,x,E,i$)\;
+	$categoria\leftarrow$ ObtenerCategoriaPorVotacion($vecinos,i$)\;
+	$x[i] \leftarrow categoria$\;
+}
+\caption{Algoritmo KNN de clasificación para imputación valores faltantes}
+\end{algorithm}
+Dado que la definición de la métrica de similitud es un aspecto importante en KNN, en la siguiente sección se detalla el marco teórico sobre las mismas.
+\section{Medidas de similitud de texto}
+Este trabajo se enfoca en las medidas de similitud de texto estadísticas o basadas en términos en los cuales una hilera es dividida en términos individuales, tales como un vector de palabras, y ésta división es utilizada para realizar cálculos y comparaciones \cite{wang2016non}. Un algoritmo de clasificación como KNN puede hacer uso de estas métricas para calcular distancias entre los elementos.\\
+Entre las métricas más comunes para comparación de vectores de palabras se encuentran la similitud \textit{Jaccard} y la distancia de Coseno \cite{soto2015similarity,wang2016non}. Sin embargo, también existen otros enfoques basados en conceptos probabilísticos no tan comunes pero que también han sido utilizados para comprar documentos, tales como la Asignación de Dirichlet Latente y la divergencia Kullback-Leibler \cite{bae2014computing,metzler2007similarity}. Todos estos métodos se explican en las siguiente secciones.
+\subsection{Distancia de Coseno}
+Esta distancia mide el grado de similitud entre dos documentos ${d_{1}}$ y ${d_{2}}$ utilizando el coseno del ángulo formado por las respectivas representaciones vectoriales, tomando en cuenta la frecuencia de cada palabra en los documentos, tal como se muestra en la fórmula \ref{equation_cosine} \cite{soto2015similarity}.
+\begin{equation}
+\label{equation_cosine}
+cos(\vec{d}_{1},\vec{d}_{2})=\frac{\vec{d}_{1}\cdot\vec{d}_{2}}{\parallel \vec{d}_{1}\parallel \parallel \vec{d}_{2} \parallel }
+\end{equation}
+\subsection{Similitud de Jaccard}
+Si se consideran dos vectores de palabras ${d_{1}}$ y ${d_{2}}$ como conjuntos de términos (no se toma en consideración la frecuencia), se define la similitud Jaccard en \ref{equation_jaccard} como el tamaño de la intersección entre  ${d_{1}}$ y ${d_{2}}$ dividido entre el tamaño de la unión de los mismos conjuntos \cite{aggarwal2015data}. 
+\begin{equation}
+\label{equation_jaccard}
+jaccard(\vec{d}_{1},\vec{d}_{2}) = \frac{\parallel\vec{d}_{1}\cap \vec{d}_{2}\parallel}{\parallel\vec{d}_{1}\cup \vec{d}_{2}\parallel}
+\end{equation}
+\subsection{Asignación de Dirichlet Latente}
+La Asignación Latente de Dirichlet (LDA por sus siglas en inglés) es un modelo probabilístico utilizado para clasificar documentos en temas (o categorías) tomando en cuenta los siguientes conceptos: un mismo documento puede tener varios temas latentes (puede pertenecer a más de una categoría) y cada tema puede ser representado como una distribución de palabras \cite{bae2014computing}. En LDA la representación de un documento ${d_{i}}$ no se hace mediante un vector de palabras, sino mediante un vector de $n$ temas latentes ${\vec{d_{i}}=p_{i,1}, p_{i,2},…, p_{i,n}}$ donde el valor ${p_{i,j}}$ indica la probabilidad de que ${d_{i}}$ pertenezca al tema $j$ para ${1 \leq  j \leq  n}$ \cite{ bae2014computing, aggarwal2015data}. Posteriormente, la similitud entre las dos distribuciones de probabilidad puede calcularse haciendo uso de cualquier medida de similitud.\\
+La idea de LDA es lograr reducción de dimensionalidad (con respecto a las representaciones tradicionales de vector de palabras) y fácilmente poder asignar probabilidades a documentos nuevos que no fueron parte del conjunto de datos de entrenamiento \cite{aggarwal2015data}.
+
+\subsection{Divergencia Kullback-Leibler }
+Considerando un documento como una distribución de probabilidad de palabras representado en un vector, se puede utilizar la divergencia Kullback-Leibler  (KL), también conocida como la entropía relativa, para medir las diferencias entre dos distribuciones de probabilidad \cite{huang2008similarity}: De forma que si $n$ es el total de palabras en una colección de documentos, dos documentos ${d_{1}}$ y ${d_{2}}$ pueden representarse como distribuciones de probabilidad ${\vec{d_{i}}=p_{i,1}, p_{i,2},…, p_{i,n}}$ donde el valor ${p_{i,j}}$ indica la probabilidad de que la palabra $j$ pertenezca al documento ${d_{i}}$ para ${i \in \left \{ 1,2 \right \}}$ y ${1 \leq  j \leq  n}$, entonces la divergencia KL se calcula en la ecuación \ref{equation_KL}.
+\begin{equation}
+\label{equation_KL}
+D_{KL}(\vec{d_{1}}\parallel\vec{d_{2}})=\sum_{j=1}^{n}{p_{1,j}\times log(\frac{p_{1,j}}{p_{2,j}})}
+\end{equation}
+La divergencia KL ha mostrado ser efectiva en \textit{clustering} de documentos y al no ser una función simétrica se debe combinar con otros métodos para lograr sintetizar los resultados de ${ D_{KL}(\vec{d_{1}}\parallel\vec{d_{2}})}$ y ${ D_{KL}(\vec{d_{2}}\parallel\vec{d_{1}})}$, como por ejemplo, la utilización de una función de promedio ponderado \cite{huang2008similarity}.\\\\
+
+Dados los algoritmos, métricas y técnicas de representación de documentos descritos hasta el momento, se puede hacer uso de métodos agregados, tales como los que se describen en la siguiente sección.
+
+\section{Métodos agregados}
+La idea de los métodos agregados es complementar los resultados de diferentes clasificadores con el fin de mejorar la precisión, de forma que al ser combinadas las predicciones se tome una decisión global basada en ciertas estrategias \cite{sabzevari2015ensemble}. A continuación se describen las dos técnicas de agregación que se estudiarán en este proyecto.  
+\subsection{Bagging}
+El método conocido como \textit{Bagging} consiste en entrenar un algoritmo utilizando diferentes muestras aleatorias, elegidas del conjunto de datos de entrenamiento original con reemplazo \cite{sabzevari2015ensemble}. Aplicado a clasificadores basados en distancias de similitud de texto, el flujo general se puede observar en el algoritmo \ref{alg-Bagging}, donde el método $ObtenerMuestraAleatoria$ crea una muestra aleatoria de tamaño fijo tomada del conjunto $E$, $\vec{c}$ se encarga de ir almacenando los clasificadores formados a partir de aplicar el algoritmo de clasificación y la medida de similitud sobre cada muestra, y finalmente se retorna una función agregada $A(.)$ que elige el resultado obtenido por la mayoría de clasificadores \cite{sabzevari2015ensemble}.
+\begin{algorithm}
+\label{alg-Bagging}
+\KwIn{\textit{E, T, S, C}}
+Sea \textit{E} el conjunto original de datos de entrenamiento)\;
+Sea \textit{T} el tamaño de la agregación\;
+Sea \textit{S} la medida de similitud de texto\;
+Sea \textit{C} el algoritmo de clasificación\;
+\For{$t\leftarrow 1$ \KwTo $T$}{
+	$M_{t} \leftarrow$ ObtenerMuestraAleatoria($E$)\;
+$c_{t}( . ) \leftarrow$ C($M_{t}, S$)\;
+}
+\KwOut{$A( . ) \leftarrow$ ObtenerCategoriaPorVotacion($\vec{c}$)}
+\caption{Método $Bagging$ aplicado a algoritmo de clasificación con medida de similitud}
+\end{algorithm}
+
+\subsection{Boosting}
+\textit{Boosting} es un método agregado en el cual se tiene una secuencia de algoritmos de clasificación, en el cual el conjunto de datos de entrenamiento de un algoritmo está formado principalmente por los elementos que fueron incorrectamente clasificados por el algoritmo anterior \cite{sabzevari2015ensemble}. \\
+En el algoritmo \ref{alg-Boosting} se muestra el pseudocódigo de $Boosting$ \cite{sabzevari2015ensemble}. En este método se realizan $T$ iteraciones y a cada elemento de $E$ se le asigna un peso, de forma que en la primera iteración todos los pesos en $\vec{w}$ son iguales. En cada iteración se obtiene una muestra aleatoria $M_{t}$ de $E$ dando prioridad a los elementos con mayor peso en $\vec{w}$ y se crea un clasificador en $\vec{c}$ utilizando dicha muestra como conjunto de datos de entrenamiento para $C$. La función $EvaluarClasificador$ ajusta los pesos en $\vec{w}$ incrementando el peso de instancias que fueron clasificadas incorrectamente y disminuyéndolo para aquellas correctamente clasificadas, además de calcular un peso general ${\alpha}_{t}$ al clasificador $c_{t}$ proporcional al grado de exactitud obtenido. Finalmente se retorna una función agregada $A(.)$ que elige el resultado mediante votación dando más relevancia a los clasificadores con mayor peso en $\vec{\alpha}$.
+\begin{algorithm}
+\label{alg-Boosting}
+\KwIn{${E, \vec{w}, T, S, C}$}
+Sea \textit{E} el conjunto original de datos de entrenamiento)\;
+Sea $\vec{w}$ un vector de pesos\;
+Sea \textit{T} el tamaño de la agregación\;
+Sea \textit{S} la medida de similitud de texto\;
+Sea \textit{C} el algoritmo de clasificación\;
+$\vec{w} \leftarrow $ InicializarVector()\; 
+\For{$t\leftarrow 1$ \KwTo $T$}{
+	$M_{t} \leftarrow$ ObtenerMuestraAleatoria($E$,$\vec{w}$)\;
+$c_{t}( . ) \leftarrow$ C($M_{t}, S$)\;
+${\alpha}_{t} \leftarrow$ EvaluarClasificador($c_{t},E,\vec{w}$)\;
+}
+\KwOut{$A( . ) \leftarrow$ ObtenerCategoriaPorVotacion($\vec{c},\vec{\alpha}$)}
+\caption{Método $Boosting$ aplicado a algoritmo de clasificación con medida de similitud}
+\end{algorithm}
+
+
